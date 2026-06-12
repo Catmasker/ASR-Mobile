@@ -7,9 +7,11 @@ android/local.properties
 
 models/*
 !models/README.md
+!models/*.bin
 
 android/app/src/main/assets/models/*
 !android/app/src/main/assets/models/README.md
+!android/app/src/main/assets/models/*.bin
 
 samples/*.wav
 samples/*.mp3

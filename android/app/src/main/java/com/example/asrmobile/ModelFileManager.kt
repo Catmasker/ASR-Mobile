@@ -4,7 +4,20 @@ import android.content.Context
 import android.net.Uri
 import java.io.File
 
+/**
+ * 模型文件管理器 — 外部文件导入
+ *
+ * 负责从系统文件选择器等外部来源导入模型文件到 app 内部存储。
+ *
+ * 内置模型（打包在 APK assets 中的模型）的查询与部署请使用 [ModelRepository]。
+ */
 class ModelFileManager(private val context: Context) {
+
+    /**
+     * 将用户通过系统文件选择器选中的模型文件拷贝到 app 内部存储
+     * @param uri 从 [android.content.Intent.ACTION_OPEN_DOCUMENT] 获取到的 content URI
+     * @return 拷贝后的 File 对象
+     */
     fun copyModelUriToAppStorage(uri: Uri): File {
         val modelsDir = File(context.filesDir, "models").apply { mkdirs() }
         val displayName = queryDisplayName(uri) ?: "selected-model.bin"
@@ -18,21 +31,6 @@ class ModelFileManager(private val context: Context) {
         return outputFile
     }
 
-    fun copyBundledModelToAppStorage(): File {
-        val modelsDir = File(context.filesDir, "models").apply { mkdirs() }
-        val outputFile = File(modelsDir, BUNDLED_MODEL_NAME)
-        if (outputFile.exists() && outputFile.length() > 0L) return outputFile
-
-        context.assets.open("models/$BUNDLED_MODEL_NAME").use { input ->
-            outputFile.outputStream().use { output -> input.copyTo(output) }
-        }
-        return outputFile
-    }
-
-    fun hasBundledModel(): Boolean = runCatching {
-        context.assets.open("models/$BUNDLED_MODEL_NAME").use { true }
-    }.getOrDefault(false)
-
     private fun queryDisplayName(uri: Uri): String? {
         val projection = arrayOf(android.provider.OpenableColumns.DISPLAY_NAME)
         context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
@@ -42,9 +40,5 @@ class ModelFileManager(private val context: Context) {
             }
         }
         return uri.lastPathSegment
-    }
-
-    companion object {
-        const val BUNDLED_MODEL_NAME = "ggml-tiny.bin"
     }
 }

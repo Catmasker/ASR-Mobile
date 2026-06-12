@@ -1,7 +1,18 @@
-# Model Assets Placeholder
+# Model Assets
 
-This folder is intentionally empty.
+This directory stores whisper.cpp-compatible `.bin` model files that are bundled into the APK at build time.
 
-You may manually place a small whisper.cpp-compatible model here for a controlled APK demo, but model files are ignored by Git and should not be committed by default.
+## How to add a new model
 
-Prefer selecting a model from Android storage or pushing one with `adb` during experiments.
+1. Place the `.bin` file here (e.g. `ggml-base.bin`)
+2. Register it in `ModelRepository.AVAILABLE_MODELS` (`app/.../asrmobile/ModelRepository.kt`)
+3. Rebuild the APK — the model will appear in the "Built-in Models" list in the app
+
+## Current models
+
+See `ModelRepository.kt` → `AVAILABLE_MODELS` for the current list.
+
+## Notes
+
+- Model files in this directory are ignored by Git by default (see `.gitignore`).
+- Large models (>150MB) may cause APK size issues; prefer pushing via `adb` for experiments.

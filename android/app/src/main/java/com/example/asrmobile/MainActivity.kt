@@ -17,6 +17,7 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private val modelFileManager by lazy { ModelFileManager(this) }
+    private val modelRepository by lazy { ModelRepository(this) }
     private val whisperEngine by lazy { WhisperEngine() }
     private val audioRecorder by lazy { AudioRecorder(this) }
     private val benchmarkRunner by lazy { BenchmarkRunner(this, whisperEngine) }
@@ -25,7 +26,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var transcriptText: TextView
     private lateinit var metricsText: TextView
 
-    private var selectedModelUri: Uri? = null
     private var selectedModelPath: String? = null
     private var latestRecording: File? = null
 
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         buildUi()
         requestMicrophonePermissionIfNeeded()
-        updateStatus("Ready. Select a local model file before transcription.")
+        updateStatus("Ready. Select a built-in model or pick a model file.")
     }
 
     private fun buildUi() {
@@ -41,14 +41,31 @@ class MainActivity : AppCompatActivity() {
         transcriptText = TextView(this).withPadding()
         metricsText = TextView(this).withPadding()
 
-        val selectModelButton = Button(this).apply {
-            text = "Select model file"
+        // ── 标题 ──
+        val title = TextView(this).apply {
+            text = "ASR Mobile"
+            textSize = 24f
+        }
+
+        // ── 外部文件选择 ──
+        val selectFileButton = Button(this).apply {
+            text = "Select model file from storage"
             setOnClickListener { selectModelFile() }
         }
-        val useBundledModelButton = Button(this).apply {
-            text = "Use bundled tiny model"
-            setOnClickListener { useBundledModel() }
+
+        // ── 内置模型仓库列表 ──
+        val builtinHeader = TextView(this).apply {
+            text = "── Built-in Models ──"
+            textSize = 16f
+            setPadding(0, 16, 0, 8)
         }
+
+        val modelListLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+        populateModelList(modelListLayout)
+
+        // ── 功能按钮 ──
         val loadModelButton = Button(this).apply {
             text = "Load model"
             setOnClickListener { loadSelectedModel() }
@@ -66,16 +83,15 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener { runBenchmark() }
         }
 
+        // ── 布局组装 ──
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 24, 24, 24)
-            addView(TextView(context).apply {
-                text = "ASR Mobile"
-                textSize = 24f
-            })
+            addView(title)
             addView(statusText)
-            addView(selectModelButton)
-            addView(useBundledModelButton)
+            addView(selectFileButton)
+            addView(builtinHeader)
+            addView(modelListLayout)
             addView(loadModelButton)
             addView(recordButton)
             addView(transcribeButton)
@@ -89,6 +105,63 @@ class MainActivity : AppCompatActivity() {
         setContentView(ScrollView(this).apply { addView(content) })
     }
 
+    /**
+     * 动态填充内置模型按钮列表
+     * 每个按钮点击后将该模型部署到运行时存储并设置为待加载模型
+     */
+    private fun populateModelList(container: LinearLayout) {
+        val models = modelRepository.getBundledModels()
+        if (models.isEmpty()) {
+            container.addView(TextView(context).apply {
+                text = "(No built-in models registered)"
+                setPadding(16, 8, 16, 8)
+            })
+            return
+        }
+
+        for (model in models) {
+            val isAvailable = modelRepository.hasModel(model)
+            val button = Button(this).apply {
+                val status = if (isAvailable) "" else " [FILE NOT FOUND in assets/]"
+                text = "${model.displayName}  (${model.estimatedSizeMB}MB)$status"
+                isEnabled = isAvailable
+                setOnClickListener { selectBundledModel(model) }
+            }
+            container.addView(button)
+
+            // 描述文字
+            if (model.description.isNotBlank()) {
+                container.addView(TextView(context).apply {
+                    text = model.description
+                    textSize = 12f
+                    setPadding(24, 0, 0, 8)
+                })
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════
+    //  模型选择
+    // ══════════════════════════════════════════
+
+    /** 选择内置模型：部署到运行时存储，标记为待加载 */
+    private fun selectBundledModel(model: BundledModel) {
+        updateStatus("Preparing ${model.displayName}...")
+        selectedModelPath = null
+        Thread {
+            val result = runCatching { modelRepository.deployModel(model).absolutePath }
+            runOnUiThread {
+                result.onSuccess { path ->
+                    selectedModelPath = path
+                    updateStatus("Selected built-in model: ${model.displayName}")
+                }.onFailure {
+                    updateStatus("Failed to prepare model: ${it.message}")
+                }
+            }
+        }.start()
+    }
+
+    /** 从系统文件选择器选取外部模型文件 */
     private fun selectModelFile() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -101,48 +174,38 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_MODEL_FILE && resultCode == Activity.RESULT_OK) {
-            selectedModelUri = data?.data
-            selectedModelUri?.let { uri ->
+            data?.data?.let { uri ->
                 contentResolver.takePersistableUriPermission(
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                selectedModelPath = modelFileManager.copyModelUriToAppStorage(uri).absolutePath
-                updateStatus("Selected model: $selectedModelPath")
+                val path = modelFileManager.copyModelUriToAppStorage(uri).absolutePath
+                selectedModelPath = path
+                updateStatus("Selected external model file: $path")
             }
         }
     }
 
-    private fun useBundledModel() {
-        if (!modelFileManager.hasBundledModel()) {
-            updateStatus("Bundled model not found in APK assets. Add ggml-tiny.bin to app/src/main/assets/models/ and rebuild.")
-            return
-        }
+    // ══════════════════════════════════════════
+    //  模型加载 / 推理 / 评测
+    // ══════════════════════════════════════════
 
-        updateStatus("Copying bundled model to app storage...")
-        Thread {
-            val result = runCatching { modelFileManager.copyBundledModelToAppStorage().absolutePath }
-            runOnUiThread {
-                result.onSuccess { path ->
-                    selectedModelPath = path
-                    updateStatus("Bundled model ready: $path")
-                }.onFailure {
-                    updateStatus("Bundled model copy failed: ${it.message}")
-                }
-            }
-        }.start()
-    }
-
+    /** 加载当前选中的模型到 WhisperEngine（JNI -> whisper.cpp） */
     private fun loadSelectedModel() {
         val path = selectedModelPath
         if (path == null) {
-            updateStatus("No model selected. This app does not download models.")
+            updateStatus("No model selected. Pick a built-in model or a model file first.")
             return
         }
 
-        runCatching { whisperEngine.loadModel(path) }
-            .onSuccess { updateStatus("Model load requested: $path") }
-            .onFailure { updateStatus("Model load failed: ${it.message}") }
+        updateStatus("Loading model...")
+        Thread {
+            val result = runCatching { whisperEngine.loadModel(path) }
+            runOnUiThread {
+                result.onSuccess { updateStatus("Model loaded successfully.") }
+                    .onFailure { updateStatus("Model load failed: ${it.message}") }
+            }
+        }.start()
     }
 
     private fun recordShortClip() {
@@ -189,6 +252,10 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { metricsText.text = result.toDisplayText() }
         }.start()
     }
+
+    // ══════════════════════════════════════════
+    //  权限
+    // ══════════════════════════════════════════
 
     private fun requestMicrophonePermissionIfNeeded() {
         if (!hasMicrophonePermission()) {
