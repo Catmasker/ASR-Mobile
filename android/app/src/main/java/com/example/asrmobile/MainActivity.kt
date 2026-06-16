@@ -8,8 +8,6 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -32,125 +30,56 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        buildUi()
+        
+        // 加载前端 XML 布局
+        setContentView(R.layout.activity_main)
+
+        // 绑定组件与业务逻辑
+        setupViewsAndListeners()
+        
         requestMicrophonePermissionIfNeeded()
         updateStatus("Ready. Select a built-in model or pick a model file.")
     }
 
-    private fun buildUi() {
-        statusText = TextView(this).withPadding()
-        transcriptText = TextView(this).withPadding()
-        metricsText = TextView(this).withPadding()
+    private fun setupViewsAndListeners() {
+        statusText = findViewById(R.id.tv_status)
+        transcriptText = findViewById(R.id.tv_transcript)
+        metricsText = findViewById(R.id.tv_metrics)
 
-        // ── 标题 ──
-        val title = TextView(this).apply {
-            text = "ASR Mobile"
-            textSize = 24f
+        findViewById<Button>(R.id.btn_select_model).setOnClickListener { 
+            selectModelFile() 
         }
 
-        // ── 外部文件选择 ──
-        val selectFileButton = Button(this).apply {
-            text = "Select model file from storage"
-            setOnClickListener { selectModelFile() }
-        }
-
-        // ── 内置模型仓库列表 ──
-        val builtinHeader = TextView(this).apply {
-            text = "── Built-in Models ──"
-            textSize = 16f
-            setPadding(0, 16, 0, 8)
-        }
-
-        val modelListLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-        populateModelList(modelListLayout)
-
-        // ── 功能按钮 ──
-        val loadModelButton = Button(this).apply {
-            text = "Load model"
-            setOnClickListener { loadSelectedModel() }
-        }
-        val recordButton = Button(this).apply {
-            text = "Record 10 seconds"
-            setOnClickListener { recordShortClip() }
-        }
-        val transcribeButton = Button(this).apply {
-            text = "Transcribe latest recording"
-            setOnClickListener { transcribeLatestRecording() }
-        }
-        val playButton = Button(this).apply {
-            text = "▶ Play latest recording"
-            setOnClickListener { playLatestRecording() }
-        }
-        val benchmarkButton = Button(this).apply {
-            text = "Run benchmark"
-            setOnClickListener { runBenchmark() }
-        }
-
-        // ── 布局组装 ──
-        val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(24, 24, 24, 24)
-            addView(title)
-            addView(statusText)
-            addView(selectFileButton)
-            addView(builtinHeader)
-            addView(modelListLayout)
-            addView(loadModelButton)
-            addView(recordButton)
-            addView(transcribeButton)
-            addView(playButton)
-            addView(benchmarkButton)
-            addView(TextView(context).apply { text = "Transcript"; textSize = 18f })
-            addView(transcriptText)
-            addView(TextView(context).apply { text = "Metrics"; textSize = 18f })
-            addView(metricsText)
-        }
-
-        setContentView(ScrollView(this).apply { addView(content) })
-    }
-
-    /**
-     * 动态填充内置模型按钮列表
-     * 每个按钮点击后将该模型部署到运行时存储并设置为待加载模型
-     */
-    private fun populateModelList(container: LinearLayout) {
-        val models = modelRepository.getBundledModels()
-        if (models.isEmpty()) {
-            container.addView(TextView(this).apply {
-                text = "(No built-in models registered)"
-                setPadding(16, 8, 16, 8)
-            })
-            return
-        }
-
-        for (model in models) {
-            val isAvailable = modelRepository.hasModel(model)
-            val button = Button(this).apply {
-                val status = if (isAvailable) "" else " [FILE NOT FOUND in assets/]"
-                text = "${model.displayName}  (${model.estimatedSizeMB}MB)$status"
-                isEnabled = isAvailable
-                setOnClickListener { selectBundledModel(model) }
+        findViewById<Button>(R.id.btn_use_bundled).setOnClickListener { 
+            val builtInModel = modelRepository.getBundledModels().firstOrNull()
+            if (builtInModel != null) {
+                selectBundledModel(builtInModel)
+            } else {
+                updateStatus("No built-in models found in assets.")
             }
-            container.addView(button)
+        }
 
-            // 描述文字
-            if (model.description.isNotBlank()) {
-                container.addView(TextView(this).apply {
-                    text = model.description
-                    textSize = 12f
-                    setPadding(24, 0, 0, 8)
-                })
-            }
+        findViewById<Button>(R.id.btn_load_model).setOnClickListener { 
+            loadSelectedModel() 
+        }
+
+        findViewById<Button>(R.id.btn_record).setOnClickListener { 
+            recordShortClip() 
+        }
+
+        findViewById<Button>(R.id.btn_transcribe).setOnClickListener { 
+            transcribeLatestRecording() 
+        }
+
+        findViewById<Button>(R.id.btn_benchmark).setOnClickListener { 
+            runBenchmark() 
+        }
+
+        findViewById<Button>(R.id.btn_play)?.setOnClickListener {
+            playLatestRecording()
         }
     }
 
-    // ══════════════════════════════════════════
-    //  模型选择
-    // ══════════════════════════════════════════
-
-    /** 选择内置模型：部署到运行时存储，标记为待加载 */
     private fun selectBundledModel(model: BundledModel) {
         updateStatus("Preparing ${model.displayName}...")
         selectedModelPath = null
@@ -167,7 +96,6 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    /** 从系统文件选择器选取外部模型文件 */
     private fun selectModelFile() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -192,11 +120,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ══════════════════════════════════════════
-    //  模型加载 / 推理 / 评测
-    // ══════════════════════════════════════════
-
-    /** 加载当前选中的模型到 WhisperEngine（JNI -> whisper.cpp） */
     private fun loadSelectedModel() {
         val path = selectedModelPath
         if (path == null) {
@@ -263,6 +186,7 @@ class MainActivity : AppCompatActivity() {
                     release()
                     runOnUiThread { updateStatus("Playback finished.") }
                 }
+                // ✅ 修复点 1：正确的原生 Android 监听器名
                 setOnErrorListener { _, what, extra ->
                     release()
                     runOnUiThread { updateStatus("Playback error: $what / $extra") }
@@ -283,14 +207,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         Thread {
-            val result = benchmarkRunner.benchmark(recording, selectedModelPath)
+            // ✅ 修复点 2：添加了 ?: "" 防止 Nullable 编译失败
+            val result = benchmarkRunner.benchmark(recording, selectedModelPath ?: "")
             runOnUiThread { metricsText.text = result.toDisplayText() }
         }.start()
     }
-
-    // ══════════════════════════════════════════
-    //  权限
-    // ══════════════════════════════════════════
 
     private fun requestMicrophonePermissionIfNeeded() {
         if (!hasMicrophonePermission()) {
@@ -308,8 +229,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateStatus(message: String) {
         statusText.text = message
     }
-
-    private fun TextView.withPadding(): TextView = apply { setPadding(0, 12, 0, 12) }
 
     companion object {
         private const val REQUEST_RECORD_AUDIO = 1001
