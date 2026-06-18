@@ -1,0 +1,158 @@
+============================================================
+  ASR Mobile — 模型基准测试报告
+============================================================
+  时间: 2026-06-18 17:11
+  主机: 小鸡翅的ROG
+  CPU:  Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
+  系统: Windows 10
+  Python: 3.10.20
+  whisper-cli: C:\Users\96402\AppData\Local\Temp\whisper-bin\Release\whisper-cli.exe
+
+────────────────────────────────────────────────────────────
+  🏆 综合排名
+────────────────────────────────────────────────────────────
+  🥇  Whisper Tiny (Multi-lang)
+      综合得分: 80.3%
+      准确率:   63.7%
+      推理速度: 682 ms
+      模型大小: 74 MB
+
+  🥈  Whisper Base Q8_0 (Multi-lang)
+      综合得分: 60.0%
+      准确率:   70.5%
+      推理速度: 1295 ms
+      模型大小: 78 MB
+
+  🥉  Whisper Tiny EN (English)
+      综合得分: 40.0%
+      准确率:   30.4%
+      推理速度: 493 ms
+      模型大小: 74 MB
+
+────────────────────────────────────────────────────────────
+  Detailed Results
+────────────────────────────────────────────────────────────
+
+  ▶ Whisper Tiny (Multi-lang)
+    文件: ggml-tiny.bin  (74 MB)
+    加载时间: 343 ms
+    平均推理: 682 ms
+    平均 RTF: 0.353
+    平均准确率: 63.7%
+    推理内存增量: -0.0 MB
+    English: 83.0%
+    Chinese: 57.9%
+    French: 50.0%
+
+    Per-phrase results:
+      + [English] Greeting     -> acc= 80%     649ms  RTF=0.36
+             Expected: How are you doing today
+             Got:      How are you doing today?
+      + [English] Weather      -> acc= 83%     645ms  RTF=0.25
+             Expected: The weather is very nice outside
+             Got:      The weather is very nice outside.
+      + [English] Order        -> acc= 86%     664ms  RTF=0.32
+             Expected: I would like a cup of coffee
+             Got:      I would like a cup of coffee.
+      + [Chinese] Greeting_zh  -> acc= 67%     669ms  RTF=0.24
+             Expected: 你好今天天气怎么样
+             Got:      你好今天天氣怎麼樣
+      + [Chinese] Order_zh     -> acc= 57%     681ms  RTF=0.29
+             Expected: 我想订一杯咖啡
+             Got:      我想定義被咖啡
+      + [Chinese] Thanks       -> acc= 50%     706ms  RTF=0.37
+             Expected: 谢谢你的帮助
+             Got:      謝謝你的幫助
+      ! [French] Salutation   -> acc= 25%     774ms  RTF=0.47
+             Expected: Bonjour comment allez vous
+             Got:      Bonjour, comment allez-vous ?
+      + [French] Commande     -> acc= 50%     672ms  RTF=0.43
+             Expected: Je voudrais un cafe
+             Got:      Je voudrais en café.
+      + [French] Thanks_fr    -> acc= 75%     677ms  RTF=0.43
+             Expected: Merci pour votre aide
+             Got:      Merci pour votre aide.
+
+  ▶ Whisper Base Q8_0 (Multi-lang)
+    文件: ggml-base-q8_0.bin  (78 MB)
+    加载时间: 784 ms
+    平均推理: 1295 ms
+    平均 RTF: 0.667
+    平均准确率: 70.5%
+    推理内存增量: 0.0 MB
+    English: 83.0%
+    Chinese: 70.1%
+    French: 58.3%
+
+    Per-phrase results:
+      + [English] Greeting     -> acc= 80%    1274ms  RTF=0.71
+             Expected: How are you doing today
+             Got:      How are you doing today?
+      + [English] Weather      -> acc= 83%    1279ms  RTF=0.50
+             Expected: The weather is very nice outside
+             Got:      The weather is very nice outside.
+      + [English] Order        -> acc= 86%    1283ms  RTF=0.61
+             Expected: I would like a cup of coffee
+             Got:      I would like a cup of coffee.
+      + [Chinese] Greeting_zh  -> acc= 89%    1321ms  RTF=0.48
+             Expected: 你好今天天气怎么样
+             Got:      你好今天天气怎么样?
+      + [Chinese] Order_zh     -> acc= 71%    1332ms  RTF=0.57
+             Expected: 我想订一杯咖啡
+             Got:      我想定一杯咖啡。
+      + [Chinese] Thanks       -> acc= 50%    1284ms  RTF=0.68
+             Expected: 谢谢你的帮助
+             Got:      謝謝你的幫助
+      ! [French] Salutation   -> acc= 25%    1231ms  RTF=0.75
+             Expected: Bonjour comment allez vous
+             Got:      Bonjour, comment allez-vous ?
+      + [French] Commande     -> acc= 75%    1360ms  RTF=0.87
+             Expected: Je voudrais un cafe
+             Got:      Je voudrais un café.
+      + [French] Thanks_fr    -> acc= 75%    1287ms  RTF=0.83
+             Expected: Merci pour votre aide
+             Got:      Merci pour votre aide.
+
+  ▶ Whisper Tiny EN (English)
+    文件: ggml-tiny.en.bin  (74 MB)
+    加载时间: 103 ms
+    平均推理: 493 ms
+    平均 RTF: 0.256
+    平均准确率: 30.4%
+    推理内存增量: 0.0 MB
+    English: 83.0%
+    Chinese: 0.0%
+    French: 8.3%
+
+    Per-phrase results:
+      + [English] Greeting     -> acc= 80%     413ms  RTF=0.23
+             Expected: How are you doing today
+             Got:      How are you doing today?
+      + [English] Weather      -> acc= 83%     417ms  RTF=0.16
+             Expected: The weather is very nice outside
+             Got:      The weather is very nice outside.
+      + [English] Order        -> acc= 86%     425ms  RTF=0.20
+             Expected: I would like a cup of coffee
+             Got:      I would like a cup of coffee.
+      ! [Chinese] Greeting_zh  -> acc=  0%     543ms  RTF=0.20
+             Expected: 你好今天天气怎么样
+             Got:      New Hao Team Kian Kian Tizumayyao
+      ! [Chinese] Order_zh     -> acc=  0%     529ms  RTF=0.22
+             Expected: 我想订一杯咖啡
+             Got:      Wojsang Dini Beitafei!
+      ! [Chinese] Thanks       -> acc=  0%     439ms  RTF=0.23
+             Expected: 谢谢你的帮助
+             Got:      See you next time!
+      ! [French] Salutation   -> acc=  0%     527ms  RTF=0.32
+             Expected: Bonjour comment allez vous
+             Got:      Buzu kumotalevu
+      ! [French] Commande     -> acc=  0%     639ms  RTF=0.41
+             Expected: Je voudrais un cafe
+             Got:      Ryouvudraian Kefi
+      ! [French] Thanks_fr    -> acc= 25%     503ms  RTF=0.32
+             Expected: Merci pour votre aide
+             Got:      Merci povatreid.
+
+============================================================
+  报告完
+============================================================

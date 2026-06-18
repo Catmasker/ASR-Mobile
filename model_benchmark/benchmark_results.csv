@@ -1,0 +1,28 @@
+﻿Model,Language,Label,Expected,Transcript,Accuracy%,InferenceMs,RTF,AudioSec,MemoryDeltaMB
+Whisper Tiny (Multi-lang),English,Greeting,How are you doing today,How are you doing today?,80.0,649,0.360,1.8,0.00
+Whisper Tiny (Multi-lang),English,Weather,The weather is very nice outside,The weather is very nice outside.,83.3,645,0.254,2.5,0.00
+Whisper Tiny (Multi-lang),English,Order,I would like a cup of coffee,I would like a cup of coffee.,85.7,664,0.318,2.1,0.00
+Whisper Tiny (Multi-lang),Chinese,Greeting_zh,你好今天天气怎么样,你好今天天氣怎麼樣,66.7,669,0.243,2.8,0.00
+Whisper Tiny (Multi-lang),Chinese,Order_zh,我想订一杯咖啡,我想定義被咖啡,57.1,681,0.290,2.4,0.00
+Whisper Tiny (Multi-lang),Chinese,Thanks,谢谢你的帮助,謝謝你的幫助,50.0,706,0.372,1.9,-0.06
+Whisper Tiny (Multi-lang),French,Salutation,Bonjour comment allez vous,"Bonjour, comment allez-vous ?",25.0,774,0.474,1.6,0.00
+Whisper Tiny (Multi-lang),French,Commande,Je voudrais un cafe,Je voudrais en café.,50.0,672,0.431,1.6,0.00
+Whisper Tiny (Multi-lang),French,Thanks_fr,Merci pour votre aide,Merci pour votre aide.,75.0,677,0.434,1.6,0.00
+Whisper Tiny EN (English),English,Greeting,How are you doing today,How are you doing today?,80.0,413,0.230,1.8,0.00
+Whisper Tiny EN (English),English,Weather,The weather is very nice outside,The weather is very nice outside.,83.3,417,0.164,2.5,0.00
+Whisper Tiny EN (English),English,Order,I would like a cup of coffee,I would like a cup of coffee.,85.7,425,0.204,2.1,0.00
+Whisper Tiny EN (English),Chinese,Greeting_zh,你好今天天气怎么样,New Hao Team Kian Kian Tizumayyao,0.0,543,0.197,2.8,0.00
+Whisper Tiny EN (English),Chinese,Order_zh,我想订一杯咖啡,Wojsang Dini Beitafei!,0.0,529,0.225,2.4,0.00
+Whisper Tiny EN (English),Chinese,Thanks,谢谢你的帮助,See you next time!,0.0,439,0.232,1.9,0.00
+Whisper Tiny EN (English),French,Salutation,Bonjour comment allez vous,Buzu kumotalevu,0.0,527,0.323,1.6,0.00
+Whisper Tiny EN (English),French,Commande,Je voudrais un cafe,Ryouvudraian Kefi,0.0,639,0.409,1.6,0.00
+Whisper Tiny EN (English),French,Thanks_fr,Merci pour votre aide,Merci povatreid.,25.0,503,0.323,1.6,0.00
+Whisper Base Q8_0 (Multi-lang),English,Greeting,How are you doing today,How are you doing today?,80.0,1274,0.708,1.8,0.00
+Whisper Base Q8_0 (Multi-lang),English,Weather,The weather is very nice outside,The weather is very nice outside.,83.3,1279,0.503,2.5,0.00
+Whisper Base Q8_0 (Multi-lang),English,Order,I would like a cup of coffee,I would like a cup of coffee.,85.7,1283,0.614,2.1,0.00
+Whisper Base Q8_0 (Multi-lang),Chinese,Greeting_zh,你好今天天气怎么样,你好今天天气怎么样?,88.9,1321,0.478,2.8,0.00
+Whisper Base Q8_0 (Multi-lang),Chinese,Order_zh,我想订一杯咖啡,我想定一杯咖啡。,71.4,1332,0.566,2.4,0.00
+Whisper Base Q8_0 (Multi-lang),Chinese,Thanks,谢谢你的帮助,謝謝你的幫助,50.0,1284,0.677,1.9,0.00
+Whisper Base Q8_0 (Multi-lang),French,Salutation,Bonjour comment allez vous,"Bonjour, comment allez-vous ?",25.0,1231,0.754,1.6,0.00
+Whisper Base Q8_0 (Multi-lang),French,Commande,Je voudrais un cafe,Je voudrais un café.,75.0,1360,0.872,1.6,0.00
+Whisper Base Q8_0 (Multi-lang),French,Thanks_fr,Merci pour votre aide,Merci pour votre aide.,75.0,1287,0.825,1.6,0.00
