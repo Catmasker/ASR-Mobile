@@ -33,6 +33,10 @@ benchmarks/
 *.onnx
 *.tflite
 
+# 但 models/ 目录下的模型文件要保留
+!models/*.bin
+!models/*.gguf
+
 *.keystore
 .DS_Store
 Thumbs.db
